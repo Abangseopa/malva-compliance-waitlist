@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Lock, Download, Upload } from 'lucide-react';
+import { ArrowLeft, Trash2, Lock, Download, Upload, Copy, ExternalLink } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
 import { 
@@ -24,6 +24,8 @@ const Admin = () => {
   const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [exportUrl, setExportUrl] = useState('');
+  const [showExportModal, setShowExportModal] = useState(false);
   const correctPassword = 'malva2024'; // Simple static password for demo purposes
 
   useEffect(() => {
@@ -101,17 +103,22 @@ const Admin = () => {
     const data = btoa(JSON.stringify(waitlistEntries));
     
     // Create shareable URL with data
-    const exportUrl = `${window.location.origin}${window.location.pathname}?importData=${encodeURIComponent(data)}`;
-    
-    // Copy to clipboard
+    const url = `${window.location.origin}${window.location.pathname}?importData=${encodeURIComponent(data)}`;
+    setExportUrl(url);
+    setShowExportModal(true);
+  };
+
+  const copyToClipboard = () => {
     navigator.clipboard.writeText(exportUrl).then(() => {
-      toast.success("Export URL copied to clipboard! Share this with your other devices or team members.");
+      toast.success("Export URL copied to clipboard!");
     }).catch(err => {
       console.error("Could not copy to clipboard: ", err);
       toast.error("Failed to copy to clipboard. Select and copy the URL manually.");
-      // Show in alert as fallback
-      alert(`Copy this URL to import waitlist data: ${exportUrl}`);
     });
+  };
+
+  const openInNewTab = () => {
+    window.open(exportUrl, '_blank');
   };
 
   const formatDate = (dateString: string) => {
@@ -190,10 +197,60 @@ const Admin = () => {
                 Export Waitlist
               </Button>
             </div>
+
+            {/* Export URL Modal */}
+            {showExportModal && (
+              <div className="mb-8 p-6 bg-white border border-malva-100 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold mb-3">Export Waitlist URL</h3>
+                <p className="text-gray-600 mb-4">
+                  Use this URL to import your waitlist data on other devices. You can copy the URL or open it directly.
+                </p>
+                
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      value={exportUrl} 
+                      readOnly 
+                      className="flex-1 bg-gray-50"
+                    />
+                    <Button 
+                      onClick={copyToClipboard}
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Button 
+                      onClick={openInNewTab}
+                      variant="secondary" 
+                      className="flex items-center gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open URL
+                    </Button>
+                    
+                    <Button 
+                      onClick={() => setShowExportModal(false)}
+                      variant="ghost" 
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {waitlistEntries.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No emails in the waitlist yet.
+                <p>No emails in the waitlist yet.</p>
+                <p className="mt-4 text-sm">
+                  When users join the waitlist from different devices, you'll need to use the Export feature 
+                  to view all entries across devices.
+                </p>
               </div>
             ) : (
               <div>
@@ -216,6 +273,10 @@ const Admin = () => {
                     </TableBody>
                   </Table>
                 </div>
+                <p className="mt-6 text-sm text-gray-500">
+                  <strong>Note:</strong> Since we're using localStorage, waitlist entries are stored separately on each device.
+                  Use the Export feature to share the waitlist data between devices.
+                </p>
               </div>
             )}
           </div>
