@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Shield, CheckCircle, Settings, BarChart3, Lock, FileCheck } from 'lucide-react';
+import { Shield, CheckCircle, Settings, BarChart3, Globe, Zap } from 'lucide-react';
 import WaitlistForm from '@/components/WaitlistForm';
 import Logo from '@/components/Logo';
 import FeatureCard from '@/components/FeatureCard';
@@ -35,10 +35,10 @@ const Index = () => {
                 Coming Soon
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text bg-gradient-to-r from-gray-900 to-malva-800">
-                Compliance simplified for stablecoin transactions
+                Free, instant global B2B payments
               </h1>
               <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-                Malva provides seamless compliance solutions for companies managing stablecoin transactions, ensuring regulatory adherence without compromising on efficiency.
+                Malva enables businesses to send and receive international payments instantly with zero fees, using next-generation financial technology.
               </p>
               
               <WaitlistForm />
@@ -54,33 +54,33 @@ const Index = () => {
         {/* Features Section */}
         <section className="py-16 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
-            <h2 className="text-3xl font-bold text-center mb-16">Compliance that works for you</h2>
+            <h2 className="text-3xl font-bold text-center mb-16">Payments that work for you</h2>
           </FadeInSection>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <FadeInSection delay={100}>
               <FeatureCard
-                icon={Shield}
-                title="Regulatory Compliance"
-                description="Stay compliant with evolving stablecoin regulations across jurisdictions with automated monitoring and updates."
+                icon={Zap}
+                title="Instant Transfers"
+                description="Send and receive payments in seconds, not days. No more waiting for bank processing or international clearance."
                 delay={100}
               />
             </FadeInSection>
             
             <FadeInSection delay={200}>
               <FeatureCard
-                icon={Settings}
-                title="Seamless Integration"
-                description="Easily integrate with your existing financial systems and blockchain infrastructure with minimal development effort."
+                icon={Globe}
+                title="Borderless Payments"
+                description="Send money to over 180 countries with no hidden fees, exchange rate markups, or international surcharges."
                 delay={200}
               />
             </FadeInSection>
             
             <FadeInSection delay={300}>
               <FeatureCard
-                icon={BarChart3}
-                title="Real-time Analytics"
-                description="Monitor transaction compliance status in real-time with comprehensive dashboards and reporting capabilities."
+                icon={Settings}
+                title="Easy Integration"
+                description="Connect Malva to your existing financial systems with our developer-friendly API and pre-built components."
                 delay={300}
               />
             </FadeInSection>
@@ -95,16 +95,16 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <FadeInSection direction="left">
                 <div>
-                  <h2 className="text-3xl font-bold mb-6">Why trust Malva with your compliance needs?</h2>
+                  <h2 className="text-3xl font-bold mb-6">Why businesses choose Malva for payments</h2>
                   <p className="text-gray-600 mb-8">
-                    Our platform is built by experts in both blockchain technology and regulatory compliance, ensuring your stablecoin operations remain fully compliant.
+                    Our platform is built on cutting-edge financial technology that eliminates the traditional costs and delays of international transfers.
                   </p>
                   
                   <ul className="space-y-4">
                     {[
-                      { icon: Lock, text: "End-to-end encryption for all sensitive data" },
-                      { icon: FileCheck, text: "Automated reporting for regulatory requirements" },
-                      { icon: Shield, text: "Continuous compliance monitoring and alerts" }
+                      { icon: Zap, text: "Zero transaction fees on all payments" },
+                      { icon: Globe, text: "Real mid-market exchange rates with no markups" },
+                      { icon: Shield, text: "Enterprise-grade security and fraud protection" }
                     ].map((item, index) => (
                       <li key={index} className="flex items-start">
                         <div className="mr-3 mt-1 text-malva-500">
@@ -122,16 +122,16 @@ const Index = () => {
                   <div className="glass-card p-6 transform-3d rotate-y-1 rotate-x-1 animate-float shadow-lg border border-white/40">
                     <div className="p-8 flex flex-col items-center">
                       <div className="h-16 w-16 bg-malva-50 rounded-full flex items-center justify-center mb-6">
-                        <Shield className="h-8 w-8 text-malva-500" />
+                        <Globe className="h-8 w-8 text-malva-500" />
                       </div>
-                      <h3 className="text-xl font-semibold mb-2 text-center">Ready for the future of finance</h3>
+                      <h3 className="text-xl font-semibold mb-2 text-center">Ready for global commerce</h3>
                       <p className="text-gray-600 text-center mb-6">
-                        As stablecoin regulations evolve, Malva adapts to keep your operations compliant and future-proof.
+                        Join thousands of businesses already saving on international payments with Malva.
                       </p>
                       <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                         <div className="bg-malva-500 h-full w-3/4 rounded-full"></div>
                       </div>
-                      <p className="text-sm text-gray-500 mt-2">Join 75% of leading stablecoin companies</p>
+                      <p className="text-sm text-gray-500 mt-2">Join 7,500+ businesses using Malva</p>
                     </div>
                   </div>
                 </div>
@@ -144,9 +144,9 @@ const Index = () => {
         <section className="py-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeInSection>
             <div className="text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6">Ready to simplify your stablecoin compliance?</h2>
+              <h2 className="text-3xl font-bold mb-6">Ready to transform your business payments?</h2>
               <p className="text-gray-600 mb-10">
-                Be among the first to experience Malva's revolutionary compliance solution. Join our waitlist today.
+                Be among the first to experience Malva's revolutionary payment platform. Join our waitlist today.
               </p>
               <WaitlistForm />
             </div>
@@ -159,7 +159,7 @@ const Index = () => {
           <div className="mb-6 md:mb-0">
             <Logo />
             <p className="text-sm text-gray-500 mt-2">
-              Compliance made simple for stablecoin transactions
+              Free and instant global B2B payments
             </p>
           </div>
           
