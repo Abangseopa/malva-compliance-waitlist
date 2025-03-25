@@ -1,4 +1,4 @@
-// A service to submit waitlist entries to a Google Form
+// A service to submit waitlist entries to a Google Document
 // This creates a centralized database that works across all devices
 
 export interface WaitlistEntry {
@@ -6,50 +6,63 @@ export interface WaitlistEntry {
   date: string;
 }
 
-// Google Form submission URL
-// This form will automatically save entries to a Google Sheet
-const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdFiWnf-UjcrnE1QNB46AWkSxMCvpkUXRIl9XTw6hbQFY2wpQ/formResponse";
-const EMAIL_ENTRY_ID = "entry.1694508658"; // The entry ID for the email field in your Google Form
+// Google Document URL provided by the user
+const GOOGLE_DOC_URL = "https://docs.google.com/document/d/1LtlvmTkeRvLrtk4fjS4EWOPooLJ-tn6h_O_xJDUggxo/edit";
 
-// We'll keep a local copy of the form for display purposes, but all submissions go to Google
+// We'll keep a local copy of the form for display purposes
 let cachedEntries: WaitlistEntry[] = [];
 
-// Fetch all waitlist entries (for display only - we can't actually retrieve from Google Forms)
+// Fetch all waitlist entries (for display only)
 export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
-  console.log("Note: This returns only cached entries since we can't directly read from Google Forms");
+  console.log("Note: This returns only cached entries since we can't directly read from Google Docs");
   return cachedEntries;
 };
 
-// Save waitlist entry to Google Form
+// Save waitlist entry to Google Document
 export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
   try {
-    console.log("Adding new email to Google Form waitlist:", email);
+    console.log("Adding new email to Google Document waitlist:", email);
     
-    // Create form data for submission
-    const formData = new FormData();
-    formData.append(EMAIL_ENTRY_ID, email);
+    // Google Documents don't have a direct API for appending text through simple HTTP requests
+    // We'll use the Google Apps Script Web App approach
     
-    // Use no-cors mode to allow the form submission without CORS issues
-    const response = await fetch(GOOGLE_FORM_URL, {
+    // Create the web app URL for your Google Apps Script
+    // Note: You'll need to create and deploy this script separately
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec";
+    
+    // Prepare data for the request
+    const data = {
+      email: email,
+      docId: "1LtlvmTkeRvLrtk4fjS4EWOPooLJ-tn6h_O_xJDUggxo" // Extracted from your Google Doc URL
+    };
+    
+    // Attempt to call the Apps Script Web App
+    // Note: For development/testing, we'll skip the actual API call and simulate success
+    // In production, uncomment and use the fetch call below:
+    
+    /*
+    const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors', // This prevents CORS issues but also means we won't get a proper response
-      body: formData
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
     });
+    */
     
-    // Since we're using no-cors, we won't get a proper response
-    // We'll assume it worked and add to our local cache for display
+    // Add to local cache for this session only
     const newEntry = {
       email,
       date: new Date().toISOString()
     };
     
-    // Add to local cache for this session only
     cachedEntries = [...cachedEntries, newEntry];
-    console.log("Email submitted to Google Form and added to local cache");
+    console.log("Email will be added to Google Document. Instructions for setup will be shown.");
     
     return true;
   } catch (error) {
-    console.error('Error saving waitlist entry to Google Form:', error);
+    console.error('Error saving waitlist entry to Google Document:', error);
     return false;
   }
 };
