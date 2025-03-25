@@ -5,17 +5,32 @@ import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
 import { Mail, CheckCircle, ArrowRight, Download } from 'lucide-react';
 
+interface WaitlistEntry {
+  email: string;
+  date: string;
+}
+
 const WaitlistForm = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [waitlistEmails, setWaitlistEmails] = useState<string[]>([]);
+  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
 
-  // Load saved emails from localStorage when component mounts
+  // Load saved entries from localStorage when component mounts
   useEffect(() => {
     const savedEmails = localStorage.getItem('waitlistEmails');
-    if (savedEmails) {
-      setWaitlistEmails(JSON.parse(savedEmails));
+    const savedEntries = localStorage.getItem('waitlistEntries');
+    
+    if (savedEntries) {
+      setWaitlistEntries(JSON.parse(savedEntries));
+    } else if (savedEmails) {
+      // Convert old format to new format
+      const entries = JSON.parse(savedEmails).map((email: string) => ({
+        email,
+        date: new Date().toISOString()
+      }));
+      setWaitlistEntries(entries);
+      localStorage.setItem('waitlistEntries', JSON.stringify(entries));
     }
   }, []);
 
@@ -27,7 +42,7 @@ const WaitlistForm = () => {
     }
 
     // Check if email is already in the waitlist
-    if (waitlistEmails.includes(email)) {
+    if (waitlistEntries.some(entry => entry.email === email)) {
       toast.info("This email is already on our waitlist!");
       return;
     }
@@ -36,12 +51,18 @@ const WaitlistForm = () => {
 
     // Simulate API call
     setTimeout(() => {
-      const updatedEmails = [...waitlistEmails, email];
+      const newEntry = {
+        email: email,
+        date: new Date().toISOString()
+      };
       
-      // Save to localStorage
-      localStorage.setItem('waitlistEmails', JSON.stringify(updatedEmails));
-      setWaitlistEmails(updatedEmails);
+      const updatedEntries = [...waitlistEntries, newEntry];
       
+      // Save to localStorage (both formats for compatibility)
+      localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));
+      localStorage.setItem('waitlistEmails', JSON.stringify(updatedEntries.map(entry => entry.email)));
+      
+      setWaitlistEntries(updatedEntries);
       setIsSubmitting(false);
       setIsSuccess(true);
       setEmail('');
@@ -55,13 +76,14 @@ const WaitlistForm = () => {
   };
 
   const downloadEmailsAsCSV = () => {
-    if (waitlistEmails.length === 0) {
+    if (waitlistEntries.length === 0) {
       toast.error("No emails in the waitlist yet");
       return;
     }
 
     // Format emails as CSV content
-    const csvContent = "data:text/csv;charset=utf-8," + waitlistEmails.join("\n");
+    const csvContent = "data:text/csv;charset=utf-8,Email,Date\n" + 
+      waitlistEntries.map(entry => `${entry.email},${new Date(entry.date).toLocaleString()}`).join("\n");
     
     // Create download link
     const encodedUri = encodeURI(csvContent);
@@ -74,7 +96,7 @@ const WaitlistForm = () => {
     link.click();
     document.body.removeChild(link);
     
-    toast.success(`Downloaded ${waitlistEmails.length} email${waitlistEmails.length > 1 ? 's' : ''}`);
+    toast.success(`Downloaded ${waitlistEntries.length} email${waitlistEntries.length > 1 ? 's' : ''}`);
   };
 
   return (
@@ -119,7 +141,7 @@ const WaitlistForm = () => {
         </div>
       </form>
 
-      {waitlistEmails.length > 0 && (
+      {waitlistEntries.length > 0 && (
         <div className="mt-4 text-center">
           <Button 
             variant="outline" 
@@ -128,7 +150,7 @@ const WaitlistForm = () => {
             className="text-xs text-gray-500 hover:text-malva-600 flex items-center gap-1 mx-auto"
           >
             <Download className="h-3 w-3" />
-            Download {waitlistEmails.length} email{waitlistEmails.length > 1 ? 's' : ''}
+            Download {waitlistEntries.length} email{waitlistEntries.length > 1 ? 's' : ''}
           </Button>
         </div>
       )}

@@ -22,9 +22,18 @@ const Index = () => {
       
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
         <Logo />
-        <Button variant="ghost" className="rounded-full px-5 hover:bg-white/80 border border-transparent hover:border-gray-200 transition-all duration-300">
-          Contact
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            variant="ghost" 
+            className="rounded-full px-5 hover:bg-white/80 border border-transparent hover:border-gray-200 transition-all duration-300"
+            onClick={() => window.location.href = '/admin'}
+          >
+            Admin
+          </Button>
+          <Button variant="ghost" className="rounded-full px-5 hover:bg-white/80 border border-transparent hover:border-gray-200 transition-all duration-300">
+            Contact
+          </Button>
+        </div>
       </header>
 
       <main>
@@ -33,7 +42,7 @@ const Index = () => {
           <div className="perspective">
             <div className="transform-3d animate-fade-up max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text bg-gradient-to-r from-gray-900 to-malva-800">
-                Enterprise-grade, Free, Instant Global Cross-border Payments
+                Enterprise Grade: Free, Instant, Global Cross-Border Payments
               </h1>
               <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
                 Malva enables businesses to send and receive international payments instantly with zero fees, using next-generation financial technology.
