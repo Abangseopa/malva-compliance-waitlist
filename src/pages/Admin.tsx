@@ -6,17 +6,46 @@ import { toast } from "sonner";
 import { ArrowLeft, Trash2, Lock } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+
+interface WaitlistEntry {
+  email: string;
+  date: string;
+}
 
 const Admin = () => {
-  const [waitlistEmails, setWaitlistEmails] = useState<string[]>([]);
+  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const correctPassword = 'malva2024'; // Simple static password for demo purposes
 
   useEffect(() => {
-    const savedEmails = localStorage.getItem('waitlistEmails');
-    if (savedEmails) {
-      setWaitlistEmails(JSON.parse(savedEmails));
+    // Try loading the new format first
+    const savedEntries = localStorage.getItem('waitlistEntries');
+    
+    if (savedEntries) {
+      setWaitlistEntries(JSON.parse(savedEntries));
+    } else {
+      // Fall back to the old format if needed
+      const savedEmails = localStorage.getItem('waitlistEmails');
+      if (savedEmails) {
+        // Convert old format to new format
+        const emails = JSON.parse(savedEmails);
+        const entries: WaitlistEntry[] = emails.map((email: string) => ({
+          email,
+          date: new Date().toISOString()
+        }));
+        setWaitlistEntries(entries);
+        // Store in the new format as well
+        localStorage.setItem('waitlistEntries', JSON.stringify(entries));
+      }
     }
   }, []);
 
@@ -32,9 +61,19 @@ const Admin = () => {
 
   const clearWaitlist = () => {
     if (confirm('Are you sure you want to clear all waitlist emails? This cannot be undone.')) {
+      localStorage.setItem('waitlistEntries', JSON.stringify([]));
       localStorage.setItem('waitlistEmails', JSON.stringify([]));
-      setWaitlistEmails([]);
+      setWaitlistEntries([]);
       toast.success("Waitlist has been cleared");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    } catch(e) {
+      return "Date not available";
     }
   };
 
@@ -97,38 +136,30 @@ const Admin = () => {
               </Button>
             </div>
             
-            {waitlistEmails.length === 0 ? (
+            {waitlistEntries.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 No emails in the waitlist yet.
               </div>
             ) : (
               <div>
-                <p className="mb-4 text-gray-500">Total submissions: {waitlistEmails.length}</p>
+                <p className="mb-4 text-gray-500">Total submissions: {waitlistEntries.length}</p>
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Signup Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {waitlistEmails.map((email, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{email}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">Not recorded</div>
-                          </td>
-                        </tr>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Signup Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {waitlistEntries.map((entry, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{entry.email}</TableCell>
+                          <TableCell>{formatDate(entry.date)}</TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             )}
