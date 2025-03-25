@@ -1,49 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, RefreshCw, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, ExternalLink } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { fetchWaitlistEntries, WaitlistEntry } from '@/services/waitlistService';
 
 const Admin = () => {
-  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const correctPassword = 'malva2024'; // Simple static password for demo purposes
-
-  useEffect(() => {
-    // Only load entries if authenticated
-    if (isAuthenticated) {
-      loadWaitlistEntries();
-    }
-  }, [isAuthenticated]);
-
-  const loadWaitlistEntries = async () => {
-    setIsLoading(true);
-    try {
-      console.log("Admin: Loading waitlist entries...");
-      const entries = await fetchWaitlistEntries();
-      console.log("Admin: Entries received:", entries);
-      setWaitlistEntries(entries);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error loading waitlist entries:", error);
-      toast.error("Failed to load waitlist entries. Please try again.");
-      setIsLoading(false);
-    }
-  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,21 +19,6 @@ const Admin = () => {
       toast.success("Successfully logged in");
     } else {
       toast.error("Incorrect password");
-    }
-  };
-
-  const refreshWaitlist = async () => {
-    toast.info("Refreshing waitlist data...");
-    await loadWaitlistEntries();
-    toast.success("Waitlist refreshed");
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleString();
-    } catch(e) {
-      return "Date not available";
     }
   };
 
@@ -118,51 +70,28 @@ const Admin = () => {
           <div className="glass-card p-8 rounded-lg">
             <h2 className="text-2xl font-bold mb-6">Waitlist Submissions</h2>
             
-            <div className="flex flex-wrap gap-4 mb-6">
-              <Button 
-                variant="outline" 
-                onClick={refreshWaitlist} 
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Refresh Waitlist
-              </Button>
-            </div>
-            
-            {isLoading ? (
-              <div className="text-center py-8">
-                <p>Loading waitlist data...</p>
-              </div>
-            ) : waitlistEntries.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No emails in the waitlist yet.</p>
-              </div>
-            ) : (
-              <div>
-                <p className="mb-4 text-gray-500">Total submissions: {waitlistEntries.length}</p>
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Signup Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {waitlistEntries.map((entry, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{entry.email}</TableCell>
-                          <TableCell>{formatDate(entry.date)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+            <div className="bg-white p-8 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-center flex-col text-center">
+                <div className="bg-malva-100 p-4 rounded-full mb-4">
+                  <ExternalLink className="h-8 w-8 text-malva-600" />
                 </div>
-                <p className="mt-6 text-sm text-gray-500">
-                  This waitlist is now centralized. All submissions from any device will appear here.
+                <h3 className="text-xl font-semibold mb-2">Google Sheets Integration</h3>
+                <p className="text-gray-600 mb-6">
+                  Waitlist entries are now being saved to a Google Sheet through a Google Form submission.
+                  You'll need to access your Google Sheet directly to view all submissions.
+                </p>
+                <Button className="bg-malva-500 hover:bg-malva-600 flex items-center gap-2"
+                  onClick={() => window.open('https://docs.google.com/spreadsheets/create', '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Access Google Sheets
+                </Button>
+                <p className="mt-8 text-sm text-gray-500">
+                  Note: This is a one-way integration. All form submissions are sent to your Google Sheet,
+                  but this admin panel cannot display them.
                 </p>
               </div>
-            )}
+            </div>
           </div>
         )}
       </main>

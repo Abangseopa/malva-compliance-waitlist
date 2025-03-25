@@ -1,92 +1,55 @@
-
-// A shared cloud database service using jsonbin.io
+// A service to submit waitlist entries to a Google Form
 // This creates a centralized database that works across all devices
-
-const BIN_ID = "65e3a45d266cfc3fde81a07e"; // This is a free public bin for demo purposes
-const READ_API_KEY = "$2a$10$V9qzCSueBe4MeVo/LdD4KO/s8qkpPHC36u8PTaQSUh7Y7nJcjA/tG"; // Read-only API key
-const WRITE_API_KEY = "$2a$10$pLj1MhzzaSxQ5QVCQFx/n.2Nr5d1.2iY3USr07nDcxZNvx1JtMhS2"; // Write-enabled API key
 
 export interface WaitlistEntry {
   email: string;
   date: string;
 }
 
-// Fetch all waitlist entries from the cloud database
+// Google Form submission URL
+// This form will automatically save entries to a Google Sheet
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdFiWnf-UjcrnE1QNB46AWkSxMCvpkUXRIl9XTw6hbQFY2wpQ/formResponse";
+const EMAIL_ENTRY_ID = "entry.1694508658"; // The entry ID for the email field in your Google Form
+
+// We'll keep a local copy of the form for display purposes, but all submissions go to Google
+let cachedEntries: WaitlistEntry[] = [];
+
+// Fetch all waitlist entries (for display only - we can't actually retrieve from Google Forms)
 export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
-  try {
-    console.log("Fetching waitlist entries from JSONBin...");
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-      method: 'GET',
-      headers: {
-        'X-Master-Key': READ_API_KEY,
-        'X-Bin-Meta': 'false'
-      }
-    });
-    
-    if (!response.ok) {
-      console.error('Failed to fetch waitlist data', await response.text());
-      return [];
-    }
-    
-    const data = await response.json();
-    console.log("Received data from JSONBin:", data);
-    
-    if (!data || !Array.isArray(data)) {
-      console.log("No entries or invalid data format returned from JSONBin, initializing empty array");
-      return [];
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Error fetching waitlist entries:', error);
-    return [];
-  }
+  console.log("Note: This returns only cached entries since we can't directly read from Google Forms");
+  return cachedEntries;
 };
 
-// Save waitlist entries to the cloud database
+// Save waitlist entry to Google Form
 export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
   try {
-    console.log("Adding new email to waitlist:", email);
+    console.log("Adding new email to Google Form waitlist:", email);
     
-    // First get existing entries
-    const entries = await fetchWaitlistEntries();
-    console.log("Current entries:", entries);
+    // Create form data for submission
+    const formData = new FormData();
+    formData.append(EMAIL_ENTRY_ID, email);
     
-    // Check if email already exists
-    if (entries.some(entry => entry.email === email)) {
-      console.log("Email already exists in waitlist");
-      return false; // Email already exists
-    }
+    // Use no-cors mode to allow the form submission without CORS issues
+    const response = await fetch(GOOGLE_FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors', // This prevents CORS issues but also means we won't get a proper response
+      body: formData
+    });
     
-    // Add new entry
+    // Since we're using no-cors, we won't get a proper response
+    // We'll assume it worked and add to our local cache for display
     const newEntry = {
       email,
       date: new Date().toISOString()
     };
     
-    const updatedEntries = [...entries, newEntry];
-    console.log("Updated entries to save:", updatedEntries);
+    // Add to local cache for this session only
+    cachedEntries = [...cachedEntries, newEntry];
+    console.log("Email submitted to Google Form and added to local cache");
     
-    // Update the remote database with WRITE_API_KEY
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': WRITE_API_KEY
-      },
-      body: JSON.stringify(updatedEntries)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Failed to update remote database', errorText);
-      return false;
-    }
-    
-    console.log("Successfully saved to JSONBin");
     return true;
   } catch (error) {
-    console.error('Error saving waitlist entry:', error);
+    console.error('Error saving waitlist entry to Google Form:', error);
     return false;
   }
 };

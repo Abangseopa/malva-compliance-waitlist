@@ -19,14 +19,14 @@ const WaitlistForm = () => {
     }
 
     setIsSubmitting(true);
-    console.log("WaitlistForm: Submitting email:", email);
+    console.log("WaitlistForm: Submitting email to Google Form:", email);
 
     try {
-      // Save to the shared database
+      // Save to Google Form
       const success = await saveWaitlistEntry(email);
       
       if (!success) {
-        toast.info("This email is already on our waitlist!");
+        toast.error("There was a problem submitting your email. Please try again.");
         setIsSubmitting(false);
         return;
       }
@@ -35,7 +35,7 @@ const WaitlistForm = () => {
       setIsSuccess(true);
       setEmail('');
       toast.success("You've been added to our waitlist!");
-      console.log("WaitlistForm: Email successfully added to waitlist");
+      console.log("WaitlistForm: Email successfully added to Google Form waitlist");
       
       // Reset success message after 3 seconds
       setTimeout(() => {
