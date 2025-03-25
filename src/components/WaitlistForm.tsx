@@ -19,6 +19,7 @@ const WaitlistForm = () => {
     }
 
     setIsSubmitting(true);
+    console.log("WaitlistForm: Submitting email:", email);
 
     try {
       // Save to the shared database
@@ -34,6 +35,7 @@ const WaitlistForm = () => {
       setIsSuccess(true);
       setEmail('');
       toast.success("You've been added to our waitlist!");
+      console.log("WaitlistForm: Email successfully added to waitlist");
       
       // Reset success message after 3 seconds
       setTimeout(() => {

@@ -13,6 +13,7 @@ export interface WaitlistEntry {
 // Fetch all waitlist entries from the cloud database
 export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
   try {
+    console.log("Fetching waitlist entries from JSONBin...");
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
       method: 'GET',
       headers: {
@@ -29,6 +30,8 @@ export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
     }
     
     const data = await response.json();
+    console.log("Received data from JSONBin:", data);
+    
     // Store in local storage as backup
     localStorage.setItem('waitlistEntries', JSON.stringify(data));
     return data || [];
@@ -43,11 +46,15 @@ export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
 // Save waitlist entries to the cloud database
 export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
   try {
+    console.log("Adding new email to waitlist:", email);
+    
     // First get existing entries
     const entries = await fetchWaitlistEntries();
+    console.log("Current entries:", entries);
     
     // Check if email already exists
     if (entries.some(entry => entry.email === email)) {
+      console.log("Email already exists in waitlist");
       return false; // Email already exists
     }
     
@@ -58,6 +65,7 @@ export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
     };
     
     const updatedEntries = [...entries, newEntry];
+    console.log("Updated entries to save:", updatedEntries);
     
     // Update the remote database
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -70,11 +78,14 @@ export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
     });
     
     if (!response.ok) {
-      console.error('Failed to update remote database', await response.text());
+      const errorText = await response.text();
+      console.error('Failed to update remote database', errorText);
       // Still update local storage
       localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));
       return true;
     }
+    
+    console.log("Successfully saved to JSONBin");
     
     // Update local storage as backup
     localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));

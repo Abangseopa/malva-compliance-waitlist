@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Lock } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Lock } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
 import { 
@@ -33,7 +33,9 @@ const Admin = () => {
   const loadWaitlistEntries = async () => {
     setIsLoading(true);
     try {
+      console.log("Admin: Loading waitlist entries...");
       const entries = await fetchWaitlistEntries();
+      console.log("Admin: Entries received:", entries);
       setWaitlistEntries(entries);
       setIsLoading(false);
     } catch (error) {
@@ -54,6 +56,7 @@ const Admin = () => {
   };
 
   const refreshWaitlist = async () => {
+    toast.info("Refreshing waitlist data...");
     await loadWaitlistEntries();
     toast.success("Waitlist refreshed");
   };
@@ -121,6 +124,7 @@ const Admin = () => {
                 onClick={refreshWaitlist} 
                 className="flex items-center gap-2"
               >
+                <RefreshCw className="h-4 w-4" />
                 Refresh Waitlist
               </Button>
             </div>
