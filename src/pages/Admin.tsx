@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Lock } from 'lucide-react';
+import { ArrowLeft, Trash2, Lock, Download, Upload } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
 import { 
@@ -27,24 +27,47 @@ const Admin = () => {
   const correctPassword = 'malva2024'; // Simple static password for demo purposes
 
   useEffect(() => {
-    // Try loading the new format first
-    const savedEntries = localStorage.getItem('waitlistEntries');
+    // Check URL for imported data
+    const params = new URLSearchParams(window.location.search);
+    const importData = params.get('importData');
     
-    if (savedEntries) {
-      setWaitlistEntries(JSON.parse(savedEntries));
+    if (importData) {
+      try {
+        const decodedData = decodeURIComponent(importData);
+        const parsedData = JSON.parse(atob(decodedData));
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          // Save imported data to localStorage
+          localStorage.setItem('waitlistEntries', JSON.stringify(parsedData));
+          setWaitlistEntries(parsedData);
+          toast.success(`Imported ${parsedData.length} waitlist entries`);
+          
+          // Remove the query parameter
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (error) {
+        console.error("Error importing data:", error);
+        toast.error("Failed to import data. Invalid format.");
+      }
     } else {
-      // Fall back to the old format if needed
-      const savedEmails = localStorage.getItem('waitlistEmails');
-      if (savedEmails) {
-        // Convert old format to new format
-        const emails = JSON.parse(savedEmails);
-        const entries: WaitlistEntry[] = emails.map((email: string) => ({
-          email,
-          date: new Date().toISOString()
-        }));
-        setWaitlistEntries(entries);
-        // Store in the new format as well
-        localStorage.setItem('waitlistEntries', JSON.stringify(entries));
+      // Regular loading from localStorage
+      const savedEntries = localStorage.getItem('waitlistEntries');
+      
+      if (savedEntries) {
+        setWaitlistEntries(JSON.parse(savedEntries));
+      } else {
+        // Fall back to the old format if needed
+        const savedEmails = localStorage.getItem('waitlistEmails');
+        if (savedEmails) {
+          // Convert old format to new format
+          const emails = JSON.parse(savedEmails);
+          const entries: WaitlistEntry[] = emails.map((email: string) => ({
+            email,
+            date: new Date().toISOString()
+          }));
+          setWaitlistEntries(entries);
+          // Store in the new format as well
+          localStorage.setItem('waitlistEntries', JSON.stringify(entries));
+        }
       }
     }
   }, []);
@@ -66,6 +89,29 @@ const Admin = () => {
       setWaitlistEntries([]);
       toast.success("Waitlist has been cleared");
     }
+  };
+
+  const exportWaitlist = () => {
+    if (waitlistEntries.length === 0) {
+      toast.info("No entries to export");
+      return;
+    }
+    
+    // Convert to base64 to make it URL-safe
+    const data = btoa(JSON.stringify(waitlistEntries));
+    
+    // Create shareable URL with data
+    const exportUrl = `${window.location.origin}${window.location.pathname}?importData=${encodeURIComponent(data)}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(exportUrl).then(() => {
+      toast.success("Export URL copied to clipboard! Share this with your other devices or team members.");
+    }).catch(err => {
+      console.error("Could not copy to clipboard: ", err);
+      toast.error("Failed to copy to clipboard. Select and copy the URL manually.");
+      // Show in alert as fallback
+      alert(`Copy this URL to import waitlist data: ${exportUrl}`);
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -125,7 +171,7 @@ const Admin = () => {
           <div className="glass-card p-8 rounded-lg">
             <h2 className="text-2xl font-bold mb-6">Waitlist Submissions</h2>
             
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-wrap gap-4 mb-6">
               <Button 
                 variant="destructive" 
                 onClick={clearWaitlist} 
@@ -133,6 +179,15 @@ const Admin = () => {
               >
                 <Trash2 className="h-4 w-4" />
                 Clear Waitlist
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={exportWaitlist} 
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export Waitlist
               </Button>
             </div>
             
