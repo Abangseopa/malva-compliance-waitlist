@@ -35,7 +35,7 @@ const Index = () => {
                 Coming Soon
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text bg-gradient-to-r from-gray-900 to-malva-800">
-                Free, instant global B2B payments
+                Free, Instant Global Cross-border Payments
               </h1>
               <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
                 Malva enables businesses to send and receive international payments instantly with zero fees, using next-generation financial technology.
