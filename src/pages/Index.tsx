@@ -32,11 +32,8 @@ const Index = () => {
         <section className="py-16 md:py-24 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="perspective">
             <div className="transform-3d animate-fade-up max-w-3xl mx-auto">
-              <div className="inline-block mb-3 px-3 py-1 bg-malva-50 text-malva-600 text-xs font-medium tracking-wider uppercase rounded-full">
-                Coming Soon
-              </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text bg-gradient-to-r from-gray-900 to-malva-800">
-                Free, Instant Global Cross-border Payments
+                Enterprise-grade, Free, Instant Global Cross-border Payments
               </h1>
               <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
                 Malva enables businesses to send and receive international payments instantly with zero fees, using next-generation financial technology.

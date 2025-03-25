@@ -23,9 +23,6 @@ const PaymentFlowDiagram = () => {
         {/* Middle Platform Section */}
         <div className="flex flex-col items-center text-center">
           <div className="glass-card p-4 w-full flex flex-col items-center justify-center min-h-[120px] border-2 border-malva-200 relative">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-malva-50 px-3 py-1 rounded-full text-xs font-medium text-malva-700">
-              Your Platform
-            </div>
             <Wallet className="h-10 w-10 text-malva-600 mb-2" />
             <h3 className="font-semibold text-lg">Malva</h3>
             <p className="text-sm text-gray-600">Handles wallets & conversion</p>
