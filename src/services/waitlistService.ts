@@ -1,6 +1,6 @@
 
-// A simple cloud database service using jsonbin.io as a free backend
-// This creates a shared database that works across all devices
+// A shared cloud database service using jsonbin.io
+// This creates a centralized database that works across all devices
 
 const BIN_ID = "65e3a45d266cfc3fde81a07e"; // This is a free public bin for demo purposes
 const READ_API_KEY = "$2a$10$V9qzCSueBe4MeVo/LdD4KO/s8qkpPHC36u8PTaQSUh7Y7nJcjA/tG"; // Read-only API key
@@ -25,22 +25,21 @@ export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
     
     if (!response.ok) {
       console.error('Failed to fetch waitlist data', await response.text());
-      // Fall back to local storage if remote fetch fails
-      const localEntries = localStorage.getItem('waitlistEntries');
-      return localEntries ? JSON.parse(localEntries) : [];
+      return [];
     }
     
     const data = await response.json();
     console.log("Received data from JSONBin:", data);
     
-    // Store in local storage as backup
-    localStorage.setItem('waitlistEntries', JSON.stringify(data));
-    return data || [];
+    if (!data || !Array.isArray(data)) {
+      console.log("No entries or invalid data format returned from JSONBin, initializing empty array");
+      return [];
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error fetching waitlist entries:', error);
-    // Fall back to local storage if remote fetch fails
-    const localEntries = localStorage.getItem('waitlistEntries');
-    return localEntries ? JSON.parse(localEntries) : [];
+    return [];
   }
 };
 
@@ -68,7 +67,7 @@ export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
     const updatedEntries = [...entries, newEntry];
     console.log("Updated entries to save:", updatedEntries);
     
-    // Update the remote database
+    // Update the remote database with WRITE_API_KEY
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
       method: 'PUT',
       headers: {
@@ -81,15 +80,10 @@ export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Failed to update remote database', errorText);
-      // Still update local storage
-      localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));
-      return true;
+      return false;
     }
     
     console.log("Successfully saved to JSONBin");
-    
-    // Update local storage as backup
-    localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));
     return true;
   } catch (error) {
     console.error('Error saving waitlist entry:', error);
