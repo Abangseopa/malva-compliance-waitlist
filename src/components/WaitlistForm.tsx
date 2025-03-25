@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { Mail, CheckCircle, ArrowRight, Download } from 'lucide-react';
+import { Mail, CheckCircle, ArrowRight } from 'lucide-react';
 
 interface WaitlistEntry {
   email: string;
@@ -75,30 +75,6 @@ const WaitlistForm = () => {
     }, 1000);
   };
 
-  const downloadEmailsAsCSV = () => {
-    if (waitlistEntries.length === 0) {
-      toast.error("No emails in the waitlist yet");
-      return;
-    }
-
-    // Format emails as CSV content
-    const csvContent = "data:text/csv;charset=utf-8,Email,Date\n" + 
-      waitlistEntries.map(entry => `${entry.email},${new Date(entry.date).toLocaleString()}`).join("\n");
-    
-    // Create download link
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `malva-waitlist-${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    
-    // Trigger download
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success(`Downloaded ${waitlistEntries.length} email${waitlistEntries.length > 1 ? 's' : ''}`);
-  };
-
   return (
     <div className="w-full max-w-md mx-auto">
       <form onSubmit={handleSubmit} className="w-full">
@@ -140,20 +116,6 @@ const WaitlistForm = () => {
           </div>
         </div>
       </form>
-
-      {waitlistEntries.length > 0 && (
-        <div className="mt-4 text-center">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={downloadEmailsAsCSV}
-            className="text-xs text-gray-500 hover:text-malva-600 flex items-center gap-1 mx-auto"
-          >
-            <Download className="h-3 w-3" />
-            Download {waitlistEntries.length} email{waitlistEntries.length > 1 ? 's' : ''}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
