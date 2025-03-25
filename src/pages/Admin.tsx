@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, Download, Trash2, Lock } from 'lucide-react';
+import { ArrowLeft, Trash2, Lock } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
 
@@ -28,24 +28,6 @@ const Admin = () => {
     } else {
       toast.error("Incorrect password");
     }
-  };
-
-  const downloadEmailsAsCSV = () => {
-    if (waitlistEmails.length === 0) {
-      toast.error("No emails in the waitlist yet");
-      return;
-    }
-
-    const csvContent = "data:text/csv;charset=utf-8," + waitlistEmails.join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `malva-waitlist-${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast.success(`Downloaded ${waitlistEmails.length} email${waitlistEmails.length > 1 ? 's' : ''}`);
   };
 
   const clearWaitlist = () => {
@@ -105,13 +87,6 @@ const Admin = () => {
             <h2 className="text-2xl font-bold mb-6">Waitlist Submissions</h2>
             
             <div className="flex gap-4 mb-6">
-              <Button 
-                onClick={downloadEmailsAsCSV} 
-                className="flex items-center gap-2 bg-malva-500 hover:bg-malva-600"
-              >
-                <Download className="h-4 w-4" />
-                Download as CSV
-              </Button>
               <Button 
                 variant="destructive" 
                 onClick={clearWaitlist} 
