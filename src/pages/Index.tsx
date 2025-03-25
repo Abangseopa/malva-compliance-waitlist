@@ -7,6 +7,7 @@ import Logo from '@/components/Logo';
 import FeatureCard from '@/components/FeatureCard';
 import GlowingBackground from '@/components/GlowingBackground';
 import FadeInSection from '@/components/FadeInSection';
+import PaymentFlowDiagram from '@/components/PaymentFlowDiagram';
 
 const Index = () => {
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -49,6 +50,20 @@ const Index = () => {
               </p>
             </div>
           </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-16 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeInSection>
+            <h2 className="text-3xl font-bold text-center mb-8">How It Works</h2>
+            <p className="text-lg text-gray-600 text-center mb-10 max-w-2xl mx-auto">
+              Our platform eliminates the complexity of cross-border payments while maintaining the speed and cost advantages of blockchain technology.
+            </p>
+          </FadeInSection>
+          
+          <FadeInSection>
+            <PaymentFlowDiagram />
+          </FadeInSection>
         </section>
 
         {/* Features Section */}
