@@ -3,7 +3,8 @@
 // This creates a shared database that works across all devices
 
 const BIN_ID = "65e3a45d266cfc3fde81a07e"; // This is a free public bin for demo purposes
-const API_KEY = "$2a$10$V9qzCSueBe4MeVo/LdD4KO/s8qkpPHC36u8PTaQSUh7Y7nJcjA/tG"; // Read-only API key
+const READ_API_KEY = "$2a$10$V9qzCSueBe4MeVo/LdD4KO/s8qkpPHC36u8PTaQSUh7Y7nJcjA/tG"; // Read-only API key
+const WRITE_API_KEY = "$2a$10$pLj1MhzzaSxQ5QVCQFx/n.2Nr5d1.2iY3USr07nDcxZNvx1JtMhS2"; // Write-enabled API key
 
 export interface WaitlistEntry {
   email: string;
@@ -17,7 +18,7 @@ export const fetchWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
     const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
       method: 'GET',
       headers: {
-        'X-Master-Key': API_KEY,
+        'X-Master-Key': READ_API_KEY,
         'X-Bin-Meta': 'false'
       }
     });
@@ -72,7 +73,7 @@ export const saveWaitlistEntry = async (email: string): Promise<boolean> => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': API_KEY
+        'X-Master-Key': WRITE_API_KEY
       },
       body: JSON.stringify(updatedEntries)
     });
