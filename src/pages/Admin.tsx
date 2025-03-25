@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Lock, Download, Upload, Copy, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Trash2, Lock } from 'lucide-react';
 import Logo from '@/components/Logo';
 import GlowingBackground from '@/components/GlowingBackground';
 import { 
@@ -14,65 +14,34 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-
-interface WaitlistEntry {
-  email: string;
-  date: string;
-}
+import { fetchWaitlistEntries, WaitlistEntry } from '@/services/waitlistService';
 
 const Admin = () => {
   const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [exportUrl, setExportUrl] = useState('');
-  const [showExportModal, setShowExportModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const correctPassword = 'malva2024'; // Simple static password for demo purposes
 
   useEffect(() => {
-    // Check URL for imported data
-    const params = new URLSearchParams(window.location.search);
-    const importData = params.get('importData');
-    
-    if (importData) {
-      try {
-        const decodedData = decodeURIComponent(importData);
-        const parsedData = JSON.parse(atob(decodedData));
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-          // Save imported data to localStorage
-          localStorage.setItem('waitlistEntries', JSON.stringify(parsedData));
-          setWaitlistEntries(parsedData);
-          toast.success(`Imported ${parsedData.length} waitlist entries`);
-          
-          // Remove the query parameter
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      } catch (error) {
-        console.error("Error importing data:", error);
-        toast.error("Failed to import data. Invalid format.");
-      }
-    } else {
-      // Regular loading from localStorage
-      const savedEntries = localStorage.getItem('waitlistEntries');
-      
-      if (savedEntries) {
-        setWaitlistEntries(JSON.parse(savedEntries));
-      } else {
-        // Fall back to the old format if needed
-        const savedEmails = localStorage.getItem('waitlistEmails');
-        if (savedEmails) {
-          // Convert old format to new format
-          const emails = JSON.parse(savedEmails);
-          const entries: WaitlistEntry[] = emails.map((email: string) => ({
-            email,
-            date: new Date().toISOString()
-          }));
-          setWaitlistEntries(entries);
-          // Store in the new format as well
-          localStorage.setItem('waitlistEntries', JSON.stringify(entries));
-        }
-      }
+    // Only load entries if authenticated
+    if (isAuthenticated) {
+      loadWaitlistEntries();
     }
-  }, []);
+  }, [isAuthenticated]);
+
+  const loadWaitlistEntries = async () => {
+    setIsLoading(true);
+    try {
+      const entries = await fetchWaitlistEntries();
+      setWaitlistEntries(entries);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error loading waitlist entries:", error);
+      toast.error("Failed to load waitlist entries. Please try again.");
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,41 +53,9 @@ const Admin = () => {
     }
   };
 
-  const clearWaitlist = () => {
-    if (confirm('Are you sure you want to clear all waitlist emails? This cannot be undone.')) {
-      localStorage.setItem('waitlistEntries', JSON.stringify([]));
-      localStorage.setItem('waitlistEmails', JSON.stringify([]));
-      setWaitlistEntries([]);
-      toast.success("Waitlist has been cleared");
-    }
-  };
-
-  const exportWaitlist = () => {
-    if (waitlistEntries.length === 0) {
-      toast.info("No entries to export");
-      return;
-    }
-    
-    // Convert to base64 to make it URL-safe
-    const data = btoa(JSON.stringify(waitlistEntries));
-    
-    // Create shareable URL with data
-    const url = `${window.location.origin}${window.location.pathname}?importData=${encodeURIComponent(data)}`;
-    setExportUrl(url);
-    setShowExportModal(true);
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(exportUrl).then(() => {
-      toast.success("Export URL copied to clipboard!");
-    }).catch(err => {
-      console.error("Could not copy to clipboard: ", err);
-      toast.error("Failed to copy to clipboard. Select and copy the URL manually.");
-    });
-  };
-
-  const openInNewTab = () => {
-    window.open(exportUrl, '_blank');
+  const refreshWaitlist = async () => {
+    await loadWaitlistEntries();
+    toast.success("Waitlist refreshed");
   };
 
   const formatDate = (dateString: string) => {
@@ -180,77 +117,21 @@ const Admin = () => {
             
             <div className="flex flex-wrap gap-4 mb-6">
               <Button 
-                variant="destructive" 
-                onClick={clearWaitlist} 
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                Clear Waitlist
-              </Button>
-              
-              <Button 
                 variant="outline" 
-                onClick={exportWaitlist} 
+                onClick={refreshWaitlist} 
                 className="flex items-center gap-2"
               >
-                <Download className="h-4 w-4" />
-                Export Waitlist
+                Refresh Waitlist
               </Button>
             </div>
-
-            {/* Export URL Modal */}
-            {showExportModal && (
-              <div className="mb-8 p-6 bg-white border border-malva-100 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold mb-3">Export Waitlist URL</h3>
-                <p className="text-gray-600 mb-4">
-                  Use this URL to import your waitlist data on other devices. You can copy the URL or open it directly.
-                </p>
-                
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Input 
-                      value={exportUrl} 
-                      readOnly 
-                      className="flex-1 bg-gray-50"
-                    />
-                    <Button 
-                      onClick={copyToClipboard}
-                      variant="outline" 
-                      className="flex items-center gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                      Copy
-                    </Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Button 
-                      onClick={openInNewTab}
-                      variant="secondary" 
-                      className="flex items-center gap-2"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Open URL
-                    </Button>
-                    
-                    <Button 
-                      onClick={() => setShowExportModal(false)}
-                      variant="ghost" 
-                    >
-                      Close
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
             
-            {waitlistEntries.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p>Loading waitlist data...</p>
+              </div>
+            ) : waitlistEntries.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <p>No emails in the waitlist yet.</p>
-                <p className="mt-4 text-sm">
-                  When users join the waitlist from different devices, you'll need to use the Export feature 
-                  to view all entries across devices.
-                </p>
               </div>
             ) : (
               <div>
@@ -274,8 +155,7 @@ const Admin = () => {
                   </Table>
                 </div>
                 <p className="mt-6 text-sm text-gray-500">
-                  <strong>Note:</strong> Since we're using localStorage, waitlist entries are stored separately on each device.
-                  Use the Export feature to share the waitlist data between devices.
+                  This waitlist is now centralized. All submissions from any device will appear here.
                 </p>
               </div>
             )}

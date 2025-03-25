@@ -1,68 +1,35 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
 import { Mail, CheckCircle, ArrowRight } from 'lucide-react';
-
-interface WaitlistEntry {
-  email: string;
-  date: string;
-}
+import { saveWaitlistEntry } from '@/services/waitlistService';
 
 const WaitlistForm = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
 
-  // Load saved entries from localStorage when component mounts
-  useEffect(() => {
-    const savedEmails = localStorage.getItem('waitlistEmails');
-    const savedEntries = localStorage.getItem('waitlistEntries');
-    
-    if (savedEntries) {
-      setWaitlistEntries(JSON.parse(savedEntries));
-    } else if (savedEmails) {
-      // Convert old format to new format
-      const entries = JSON.parse(savedEmails).map((email: string) => ({
-        email,
-        date: new Date().toISOString()
-      }));
-      setWaitlistEntries(entries);
-      localStorage.setItem('waitlistEntries', JSON.stringify(entries));
-    }
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !email.includes('@')) {
       toast.error("Please enter a valid email address");
       return;
     }
 
-    // Check if email is already in the waitlist
-    if (waitlistEntries.some(entry => entry.email === email)) {
-      toast.info("This email is already on our waitlist!");
-      return;
-    }
-
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const newEntry = {
-        email: email,
-        date: new Date().toISOString()
-      };
+    try {
+      // Save to the shared database
+      const success = await saveWaitlistEntry(email);
       
-      const updatedEntries = [...waitlistEntries, newEntry];
+      if (!success) {
+        toast.info("This email is already on our waitlist!");
+        setIsSubmitting(false);
+        return;
+      }
       
-      // Save to localStorage (both formats for compatibility)
-      localStorage.setItem('waitlistEntries', JSON.stringify(updatedEntries));
-      localStorage.setItem('waitlistEmails', JSON.stringify(updatedEntries.map(entry => entry.email)));
-      
-      setWaitlistEntries(updatedEntries);
       setIsSubmitting(false);
       setIsSuccess(true);
       setEmail('');
@@ -72,7 +39,11 @@ const WaitlistForm = () => {
       setTimeout(() => {
         setIsSuccess(false);
       }, 3000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error submitting to waitlist:", error);
+      toast.error("There was a problem adding you to the waitlist. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
