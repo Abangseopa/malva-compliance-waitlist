@@ -14,6 +14,14 @@ const Index = () => {
 
   useEffect(() => {
     setIsPageLoaded(true);
+    
+    // Force a re-render to ensure the WaitlistForm is displayed correctly
+    const timer = setTimeout(() => {
+      setIsPageLoaded(false);
+      setTimeout(() => setIsPageLoaded(true), 10);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   return (
