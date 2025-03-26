@@ -38,7 +38,11 @@ const Index = () => {
           >
             Admin
           </Button>
-          <Button variant="ghost" className="rounded-full px-5 hover:bg-white/80 border border-transparent hover:border-gray-200 transition-all duration-300">
+          <Button 
+            variant="ghost" 
+            className="rounded-full px-5 hover:bg-white/80 border border-transparent hover:border-gray-200 transition-all duration-300"
+            onClick={() => window.location.href = '/contact'}
+          >
             Contact
           </Button>
         </div>
